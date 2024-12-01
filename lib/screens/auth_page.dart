@@ -9,22 +9,38 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool isLogin = true;
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  // Controllers for date of birth
+  final TextEditingController _dobDayController = TextEditingController();
+  final TextEditingController _dobMonthController = TextEditingController();
+  final TextEditingController _dobYearController = TextEditingController();
+
+  String? _selectedGender;
+
+  bool isLogin =
+      true; // Track whether we're showing the sign-in or sign-up form
 
   static const Color brandColor = Color(0xFFE86343);
 
+  // Method to build the text field
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     bool isPassword = false,
+    TextInputType? keyboardType,
   }) {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       child: TextField(
         controller: controller,
         obscureText: isPassword,
+        keyboardType: keyboardType,
         style: const TextStyle(fontSize: 16),
         decoration: InputDecoration(
           labelText: label,
@@ -52,6 +68,7 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
+  // Method to build social buttons
   Widget _buildSocialButton({
     required String text,
     IconData? icon,
@@ -114,6 +131,7 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
+  // Method to build primary button (Sign in / Sign up)
   Widget _buildPrimaryButton({
     required String text,
     required VoidCallback onPressed,
@@ -141,13 +159,14 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
+  // Method to build the sign-in form
   Widget _buildSignInForm() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildTextField(
-          controller: _emailController,
-          label: 'Email',
+          controller: _usernameController,
+          label: 'Username',
         ),
         const SizedBox(height: 16),
         _buildTextField(
@@ -158,7 +177,30 @@ class _AuthPageState extends State<AuthPage> {
         const SizedBox(height: 24),
         _buildPrimaryButton(
           text: 'Sign in',
-          onPressed: () {},
+          onPressed: () {
+            // Add your sign-in logic here
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        // Forgot Password Link (Above OR Divider)
+        Align(
+          child: TextButton(
+            onPressed: () {
+              // Implement forgot password functionality
+            },
+            child: Text(
+              'Forgot Password?',
+              style: TextStyle(
+                color: brandColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ),
         const SizedBox(height: 24),
         Row(
@@ -176,32 +218,173 @@ class _AuthPageState extends State<AuthPage> {
         ),
         const SizedBox(height: 24),
         _buildSocialButton(
-          text: 'Sign in with Facebook',
+          text: 'Continue with Google',
+          iconWidget: Image.asset(
+            'images/googlelogo.webp',
+            height: 24,
+          ),
+          onPressed: () {},
+        ),
+        const SizedBox(height: 12),
+        _buildSocialButton(
+          text: 'Continue with Facebook',
           icon: Icons.facebook,
           iconColor: Colors.blue,
           onPressed: () {},
-          outlined: true,
         ),
-        const SizedBox(height: 16),
-        TextButton(
+        const SizedBox(height: 12),
+        _buildSocialButton(
+          text: 'Continue with Mobile',
+          icon: Icons.phone,
+          iconColor: Colors.green,
           onPressed: () {},
-          child: Text(
-            'Forgot Password?',
-            style: TextStyle(
-              color: brandColor,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+        ),
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Don't have an account? ",
+              style: TextStyle(fontSize: 14),
             ),
-          ),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isLogin = false; // Switch to sign-up form
+                });
+              },
+              child: const Text(
+                'Sign up',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: brandColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
+  // Method to build the sign-up form
   Widget _buildSignUpForm() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        _buildTextField(
+          controller: _usernameController,
+          label: 'Username',
+        ),
+        const SizedBox(height: 16),
+        _buildTextField(
+          controller: _passwordController,
+          label: 'Password',
+          isPassword: true,
+        ),
+        const SizedBox(height: 16),
+        _buildTextField(
+          controller: _confirmPasswordController,
+          label: 'Confirm Password',
+          isPassword: true,
+        ),
+        const SizedBox(height: 16),
+        _buildTextField(
+          controller: _ageController,
+          label: 'Age',
+          keyboardType: TextInputType.number,
+        ),
+        const SizedBox(height: 16),
+        // Gender Dropdown
+        Container(
+          margin: const EdgeInsets.only(top: 8),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: DropdownButtonFormField<String>(
+            decoration: const InputDecoration(
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              labelText: 'Gender',
+              border: InputBorder.none,
+            ),
+            value: _selectedGender,
+            items: ['Male', 'Female', 'Other']
+                .map((gender) => DropdownMenuItem(
+                      value: gender,
+                      child: Text(gender),
+                    ))
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedGender = value;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Date of Birth Fields
+        Row(
+          children: [
+            Expanded(
+              child: _buildTextField(
+                controller: _dobDayController,
+                label: 'Day',
+                keyboardType: TextInputType.number,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildTextField(
+                controller: _dobMonthController,
+                label: 'Month',
+                keyboardType: TextInputType.number,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildTextField(
+                controller: _dobYearController,
+                label: 'Year',
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildTextField(
+          controller: _emailController,
+          label: 'Email',
+          keyboardType: TextInputType.emailAddress,
+        ),
+        const SizedBox(height: 24),
+        _buildPrimaryButton(
+          text: 'Create Account',
+          onPressed: () {
+            // Add your sign-up logic here
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          },
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: const [
+            Expanded(child: Divider()),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'OR',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            Expanded(child: Divider()),
+          ],
+        ),
+        const SizedBox(height: 24),
         _buildSocialButton(
           text: 'Continue with Google',
           iconWidget: Image.asset(
@@ -212,51 +395,42 @@ class _AuthPageState extends State<AuthPage> {
         ),
         const SizedBox(height: 12),
         _buildSocialButton(
-          text: 'Continue with Email',
-          icon: Icons.mail_outline,
-          iconColor: Colors.black87,
-          onPressed: () {},
-        ),
-        const SizedBox(height: 12),
-        _buildSocialButton(
-          text: 'Continue with Apple',
-          icon: Icons.apple,
-          iconColor: Colors.black,
-          onPressed: () {},
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Row(
-            children: const [
-              Expanded(child: Divider()),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'or',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-              Expanded(child: Divider()),
-            ],
-          ),
-        ),
-        _buildSocialButton(
           text: 'Continue with Facebook',
           icon: Icons.facebook,
           iconColor: Colors.blue,
           onPressed: () {},
         ),
+        const SizedBox(height: 12),
+        _buildSocialButton(
+          text: 'Continue with Mobile',
+          icon: Icons.phone,
+          iconColor: Colors.green,
+          onPressed: () {},
+        ),
         const SizedBox(height: 24),
-        _buildPrimaryButton(
-          text: 'Sign up',
-          onPressed: () {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const HomePage()),
-              );
-            });
-          },
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Already have an account? ",
+              style: TextStyle(fontSize: 14),
+            ),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isLogin = true; // Switch to sign-in form
+                });
+              },
+              child: const Text(
+                'Sign in',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: brandColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -264,30 +438,31 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Build method remains the same as in the original code
+    // Only content inside has been modified
     return Scaffold(
       backgroundColor: brandColor,
-      resizeToAvoidBottomInset:
-          true, // This ensures the layout adjusts when the keyboard appears.
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                children: const [
-                  Text(
-                    'EventMatch',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  children: const [
+                    Text(
+                      'EventMatch',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: Container(
+              Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -299,71 +474,24 @@ class _AuthPageState extends State<AuthPage> {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(24),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          TextButton(
-                            onPressed: () => setState(() => isLogin = true),
-                            child: Text(
-                              'Sign in',
-                              style: TextStyle(
-                                color: isLogin ? brandColor : Colors.grey,
-                                fontWeight: isLogin
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () => setState(() => isLogin = false),
-                            child: Text(
-                              'Sign up',
-                              style: TextStyle(
-                                color: !isLogin ? brandColor : Colors.grey,
-                                fontWeight: !isLogin
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 24),
-                          child:
-                              isLogin ? _buildSignInForm() : _buildSignUpForm(),
+                      child: Text(
+                        isLogin ? 'Sign in' : 'Sign up',
+                        style: TextStyle(
+                          color: brandColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
                         ),
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(
-                        left: 24,
-                        right: 24,
-                        bottom: MediaQuery.of(context).viewInsets.bottom == 0
-                            ? 16
-                            : 0,
-                        top: 16,
-                      ),
-                      child: const Text(
-                        'By proceeding, you agree to EventMatch\'s Privacy Policy, User Agreement and T&Cs',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+                      padding: const EdgeInsets.all(24),
+                      child: isLogin ? _buildSignInForm() : _buildSignUpForm(),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
